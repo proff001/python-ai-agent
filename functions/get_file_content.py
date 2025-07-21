@@ -2,6 +2,8 @@ import os
 
 from google.genai import types
 
+from config import MAX_CHARS
+
 
 def get_file_content(working_directory, file_path):
     work_dir = os.path.abspath(working_directory)
@@ -15,7 +17,7 @@ def get_file_content(working_directory, file_path):
 
     try:
         with open(file, "r") as f:
-            file_content = f.read(10000)
+            file_content = f.read(MAX_CHARS)
 
             if f.read(1) != "":
                 file_content += f'[...File "{file_path}" truncated at 10000 characters]'
