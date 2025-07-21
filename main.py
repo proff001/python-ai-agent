@@ -9,6 +9,7 @@ from functions.declerations import available_functions
 from functions.handler import handle_function_call
 
 from prompt import system_prompt
+from config import MAX_ITS
 
 
 def main():
@@ -37,7 +38,22 @@ def main():
         types.Content(role="user", parts=[types.Part(text=prompt)]),
     ]
 
-    generate_response(client, messages, verbose)
+    iterations = 0
+    while True:
+        iterations += 1
+        if iterations > MAX_ITS:
+            print(f"Max iterations reached: {MAX_ITS}")
+            sys.exit(1)
+
+        try:
+            response = generate_response(client, messages, verbose)
+
+            if response:
+                print(f"Final Response:\n{response}")
+                break
+
+        except Exception as e:
+            return f"Error: while generating response: {e}"
 
 
 def generate_response(client, messages, verbose):
@@ -72,8 +88,11 @@ def generate_response(client, messages, verbose):
     if not func_response:
         raise Exception("No function call response generated, exiting")
 
+    for candidate in res.candidates:
+        messages.append(candidate.content)
+
     for func_res in func_response:
-        messages.append(types.Content(role="Tool", parts=[types.Part(text=func_res)]))
+        messages.append(func_res)
 
 
 if __name__ == "__main__":
